@@ -1,4 +1,4 @@
 apiVersion: v1
-description: A Helm chart for installing AFM in Kubernetes
-name: arrow-flight-module-chart
+description: A Helm chart for deleting data in Fybrik
+name: delete-module
 version: "0.0.0"

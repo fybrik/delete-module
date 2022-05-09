@@ -11,7 +11,7 @@ $(TOOLBIN)/kind:
 	GOBIN=$(ABSTOOLBIN) go install sigs.k8s.io/kind@v0.11.1
 
 INSTALL_TOOLS += $(TOOLBIN)/kubebuilder
-$(TOOLBIN)/kubebuilder $(TOOLBIN)/etcd $(TOOLBIN)/kube-apiserver $(TOOLBIN)/kubectl:
+$(TOOLBIN)/kubebuilder $(TOOLBIN)/etcd $(TOOLBIN)/kubectl:
 	cd $(TOOLS_DIR); ./install_kubebuilder.sh
 
 .PHONY: install-tools
