@@ -1,0 +1,8 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Test scrips
+run.log
+update.sh
+install-sample.sh
