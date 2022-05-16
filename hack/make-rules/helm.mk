@@ -15,8 +15,8 @@ HELM_VALUES ?= \
 	--set hello=world1
 
 TEMP := /tmp
-CHART_LOCAL_PATH ?= helm/afm 
-CHART_NAME ?= delete-module
+CHART_LOCAL_PATH ?= helm/delete-module 
+CHART_NAME ?= delete-module-chart
 HELM_RELEASE ?= rel1-${DOCKER_NAME}
 HELM_TAG ?= 0.0.0
 

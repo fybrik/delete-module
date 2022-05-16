@@ -2,7 +2,10 @@
 __pycache__/
 *.py[cod]
 
-# Test scrips
+# Test scripts
 run.log
 update.sh
 install-sample.sh
+
+# Binary files
+hack/tools/bin/
