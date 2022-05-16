@@ -3,8 +3,8 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app.kubernetes.io/name: {{ include "arrow-flight-module.name" . }}
-    helm.sh/chart: {{ include "arrow-flight-module.chart" . }}
+    app.kubernetes.io/name: {{ include "delete-module.name" . }}
+    helm.sh/chart: {{ include "delete-module.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
@@ -15,5 +15,5 @@ spec:
       protocol: TCP
       name: grpc
   selector:
-    app.kubernetes.io/name: {{ include "arrow-flight-module.name" . }}
+    app.kubernetes.io/name: {{ include "delete-module.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

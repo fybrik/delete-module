@@ -1,17 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "arrow-flight-module.fullname" . }}
+  name: {{ include "delete-module.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "arrow-flight-module.name" . }}
-    helm.sh/chart: {{ include "arrow-flight-module.chart" . }}
+    app.kubernetes.io/name: {{ include "delete-module.name" . }}
+    helm.sh/chart: {{ include "delete-module.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "arrow-flight-module.name" . }}
+        app.kubernetes.io/name: {{ include "delete-module.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         {{- range $key, $val := .Values.labels }}
         {{ $key }}: {{ $val | quote }}
@@ -20,7 +20,7 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ include "arrow-flight-module.fullname" . }}
+      serviceAccountName: {{ include "delete-module.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -40,7 +40,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "arrow-flight-module.fullname" . }}
+            name: {{ include "delete-module.fullname" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
