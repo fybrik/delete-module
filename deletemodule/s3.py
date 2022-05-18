@@ -1,8 +1,44 @@
 from fybrik_python_logging import logger, Error, DataSetID, ForUser
 from fybrik_python_vault import get_jwt_from_file, get_raw_secret_from_vault
+import boto3
 
+def s3_connection(endpoint, aws_access_key, aws_secret_key):
+    try:
+        logger.info("Connecting S3 client")
+        s3_resource = boto3.resource("s3", endpoint_url=endpoint, aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key)
+    except Exception as e:
+        logger.error("Could not connect to S3", extra={Error: str(e), ForUser: True})
+    else:
+        return s3_resource
 
-def get_credentials_from_vault(vault_credentials, datasetID):
+def delete_object(resource, bucket_name, object_key):
+    try:
+        logger.info(f"Deleting object: '{object_key}' from bucket: '{bucket_name}'")
+        obj = resource.ObjectSummary(bucket_name=bucket_name, key=object_key)
+        if obj not in resource.Bucket(bucket_name).objects.all():
+            logger.error(f"Couldn't find object key '{object_key}' in bucket '{bucket_name}'")
+            return
+        obj.delete()
+        logger.info(f"Successfully deleted object: '{object_key}'")
+    except Exception as e:
+        logger.error(f"Could not delete object '{object_key}'",
+            extra={Error: str(e), ForUser: True})
+        
+
+def delete_bucket_if_empty(resource, bucket_name):
+    try:
+        logger.info(f"DeleteBucketIfEmpty is true; Checking if bucket '{bucket_name}' is empty")
+        bucket = resource.Bucket(bucket_name)
+        if not list(bucket.objects.all()):
+            bucket.delete()
+            logger.info(f"Successfully deleted bucket: '{bucket_name}'")
+        else:
+            logger.info(f"Bucket '{bucket_name}' is not empty, delete aborted")
+    except Exception as e:
+        logger.error(f"Could not delete bucket '{bucket_name}'",
+            extra={Error: str(e), ForUser: True})
+
+def get_s3_credentials_from_vault(vault_credentials, datasetID):
     jwt_file_path = vault_credentials.get('jwt_file_path', '/var/run/secrets/kubernetes.io/serviceaccount/token')
     jwt = get_jwt_from_file(jwt_file_path)
     vault_address = vault_credentials.get('address', 'https://localhost:8200')

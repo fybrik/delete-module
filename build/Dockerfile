@@ -11,7 +11,7 @@ RUN python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
 
 WORKDIR /app
 COPY main.py main.py
-COPY deletem deletem
+COPY deletemodule deletemodule
 
 ENTRYPOINT ["python3"]
 CMD ["main.py"]
