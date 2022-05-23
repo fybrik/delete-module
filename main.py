@@ -1,5 +1,5 @@
-from deletem.config import Config
-from deletem.s3 import s3_connection, delete_bucket_if_empty, delete_object, get_s3_credentials_from_vault
+from deletemodule.config import Config
+from deletemodule.s3 import s3_connection, delete_bucket_if_empty, delete_object, get_s3_credentials_from_vault
 from fybrik_python_logging import init_logger, logger
 
 
