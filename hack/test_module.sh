@@ -4,10 +4,10 @@ set -x
 set -e
 
 # Run from main dir
-export WORKING_DIR=hack/test-script
+export WORKING_DIR=./test-script
 export ACCESS_KEY=1234
 export SECRET_KEY=1234
-export TOOLBIN=hack/tools/bin
+export TOOLBIN=./tools/bin
 
 # Check if got args (like in github workflow test), else use default values
 if [ $# -eq 0 ]
@@ -158,7 +158,7 @@ ${TOOLBIN}/kubectl wait --for=condition=complete --all job -n fybrik-blueprints
 
 # Check if test succeeded
 POD_NAME=$(${TOOLBIN}/kubectl get pods -n fybrik-blueprints -o=name | sed "s/^.\{4\}//")
-TEST_RES=$(${TOOLBIN}/kubectl logs $POD_NAME | grep "Successfully deleted object" | wc -l)
+TEST_RES=$(${TOOLBIN}/kubectl logs $POD_NAME -n fybrik-blueprints | grep "Successfully deleted object" | wc -l)
 
 # Terminate notebook-sample
 pkill kubectl
@@ -171,4 +171,5 @@ then
     echo "Test Succeeded"
 else
     echo "Test Failed"
+    exit 1
 fi
