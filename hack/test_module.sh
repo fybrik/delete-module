@@ -4,15 +4,24 @@ set -x
 set -e
 
 # Run from main dir
-export WORKING_DIR=hack/test-script
+export WORKING_DIR=./test-script
 export ACCESS_KEY=1234
 export SECRET_KEY=1234
-export TOOLBIN=hack/tools/bin
+export TOOLBIN=./tools/bin
 
-kubernetesVersion=$(${TOOLBIN}/kubectl version -o=json | jq -r '.clientVersion.minor')
-fybrikVersion=0.6.4
-moduleVersion=0.6.0
-certManagerVersion=1.6.2
+# Check if got args (like in github workflow test), else use default values
+if [ $# -eq 0 ]
+then 
+    kubernetesVersion=$(${TOOLBIN}/kubectl version -o=json | jq -r '.clientVersion.minor')
+    fybrikVersion=dev
+    moduleVersion=0.6.0
+    certManagerVersion=1.6.2
+else
+    kubernetesVersion=$1
+    fybrikVersion=$2
+    moduleVersion=$3
+    certManagerVersion=$4
+fi
 
 # Trim the last two charts of the module version
 # to construct the module resource path
@@ -56,20 +65,35 @@ ${TOOLBIN}/helm install cert-manager jetstack/cert-manager \
     --set installCRDs=true \
     --wait --timeout 600s
 
-
-# Install vault
-${TOOLBIN}/helm install vault fybrik-charts/vault --create-namespace -n fybrik-system \
+# Check if dev version or release
+if [ $fybrikVersion == "dev" ]
+then
+    # Install vault
+    git clone https://github.com/fybrik/fybrik.git
+    cd fybrik
+    helm dependency update charts/vault
+    helm install vault charts/vault --create-namespace -n fybrik-system \
         --set "vault.injector.enabled=false" \
         --set "vault.server.dev.enabled=true" \
-        --values https://raw.githubusercontent.com/fybrik/fybrik/v$fybrikVersion/charts/vault/env/dev/vault-single-cluster-values.yaml
-    ${TOOLBIN}/kubectl wait --for=condition=ready --all pod -n fybrik-system --timeout=400s
+        --values charts/vault/env/dev/vault-single-cluster-values.yaml
+    kubectl wait --for=condition=ready --all pod -n fybrik-system --timeout=120s
 
+    # Install fybrik charts
+    helm install fybrik-crd charts/fybrik-crd -n fybrik-system --wait
+    helm install fybrik charts/fybrik --set global.tag=master --set global.imagePullPolicy=Always -n fybrik-system --wait
+    cd -
+else
+    # Install vault
+    ${TOOLBIN}/helm install vault fybrik-charts/vault --create-namespace -n fybrik-system \
+            --set "vault.injector.enabled=false" \
+            --set "vault.server.dev.enabled=true" \
+            --values https://raw.githubusercontent.com/fybrik/fybrik/v$fybrikVersion/charts/vault/env/dev/vault-single-cluster-values.yaml
+        ${TOOLBIN}/kubectl wait --for=condition=ready --all pod -n fybrik-system --timeout=400s
 
-# Install fybrik charts
-cd ~/fybrik
-helm install fybrik-crd charts/fybrik-crd -n fybrik-system --wait
-helm install fybrik charts/fybrik --set global.tag=master --set global.imagePullPolicy=Always -n fybrik-system --wait
-cd -
+    # Install fybrik charts
+    helm install fybrik-crd fybrik-charts/fybrik-crd -n fybrik-system --version v$fybrikVersion --wait
+    helm install fybrik fybrik-charts/fybrik -n fybrik-system --version v$fybrikVersion  --wait
+fi
 
 # Create Module:
 CMD="${TOOLBIN}/kubectl apply -f ${WORKING_DIR}/../../module.yaml -n fybrik-system"
@@ -112,11 +136,11 @@ stringData:
 EOF
 
 # Create Asset
-${TOOLBIN}/kubectl apply -f $WORKING_DIR/Asset-0.6.0.yaml -n fybrik-notebook-sample
+${TOOLBIN}/kubectl apply -f $WORKING_DIR/Asset-$moduleResourceVersion.yaml -n fybrik-notebook-sample
 ${TOOLBIN}/kubectl describe Asset paysim-csv -n fybrik-notebook-sample
 
 # Create policy
-${TOOLBIN}/kubectl -n fybrik-system create configmap sample-policy --from-file=$WORKING_DIR/sample-policy-0.6.0.rego
+${TOOLBIN}/kubectl -n fybrik-system create configmap sample-policy --from-file=$WORKING_DIR/sample-policy-$moduleResourceVersion.rego
 ${TOOLBIN}/kubectl -n fybrik-system label configmap sample-policy openpolicyagent.org/policy=rego
 
 c=0
@@ -128,4 +152,24 @@ do
 done
 
 # Install Fybrikapplication
-${TOOLBIN}/kubectl apply -f ${WORKING_DIR}/fybrikapplication.yaml -n fybrik-notebook-sample
+${TOOLBIN}/kubectl apply -f ${WORKING_DIR}/fybrikapplication-$moduleResourceVersion.yaml -n fybrik-notebook-sample
+sleep 5
+${TOOLBIN}/kubectl wait --for=condition=complete --all job -n fybrik-blueprints
+
+# Check if test succeeded
+POD_NAME=$(${TOOLBIN}/kubectl get pods -n fybrik-blueprints -o=name | sed "s/^.\{4\}//")
+TEST_RES=$(${TOOLBIN}/kubectl logs $POD_NAME -n fybrik-blueprints | grep "Successfully deleted object" | wc -l)
+
+# Terminate notebook-sample
+pkill kubectl
+${TOOLBIN}/kubectl delete namespace fybrik-notebook-sample
+${TOOLBIN}/kubectl -n fybrik-system delete configmap sample-policy
+
+# Print test results
+if [ $TEST_RES != "0" ]
+then
+    echo "Test Succeeded"
+else
+    echo "Test Failed"
+    exit 1
+fi
