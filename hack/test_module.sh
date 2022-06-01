@@ -82,6 +82,7 @@ then
     helm install fybrik-crd charts/fybrik-crd -n fybrik-system --wait
     helm install fybrik charts/fybrik --set global.tag=master --set global.imagePullPolicy=Always -n fybrik-system --wait
     cd -
+    rm -f -R fybrik
 else
     # Install vault
     ${TOOLBIN}/helm install vault fybrik-charts/vault --create-namespace -n fybrik-system \
