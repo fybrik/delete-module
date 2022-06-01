@@ -19,7 +19,7 @@ if __name__ == "__main__":
     s3_resource = s3_connection(endpoint, access_key, secret_key)
 
     delete_object(s3_resource, bucket_name, object_key)
-    delete_empty_bucket = True # will be set to get the vaule form configmap when fybrik will have that feature
+    delete_empty_bucket = False # will be set to get the vaule form configmap when fybrik will have that feature
     if delete_empty_bucket:
         delete_bucket_if_empty(s3_resource, bucket_name)
 
