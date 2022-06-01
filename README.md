@@ -2,7 +2,8 @@
 
 # delete-module
 
-The delete-module for [Fybrik](https://github.com/fybrik/fybrik) allows to delete objects in s3 buckets and remove empty buckets after object deletion.
+The delete-module for [Fybrik](https://github.com/fybrik/fybrik) allows to delete objects in s3.
+Currently deleting empty buckets is not supported.
 
 ## Register as a Fybrik module
 
@@ -11,12 +12,12 @@ To register delete-module as a Fybrik module apply `module.yaml` to the fybrik-s
 To install the latest release run:
 
 ```bash
-kubectl apply -f https://github.com/Raviv-S/delete-module/blob/main/module.yaml -n fybrik-system
+kubectl apply -f -n fybrik-system https://raw.githubusercontent.com/fybrik/delete-module/main/module.yaml
 ```
 
 ### Version compatibility matrix
 
-| Fybrik           | AFM     | Command
+| Fybrik           | delete-module     | Command
 | ---              | ---     | ---
-| master           | master  | `https://raw.githubusercontent.com/Raviv-S/delete-module/main/module.yaml`
+| master           | master  | `https://raw.githubusercontent.com/fybrik/delete-module/main/module.yaml`
 
