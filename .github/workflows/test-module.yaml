@@ -1,5 +1,4 @@
 name: Test
-<<<<<<< HEAD
 on: 
   workflow_dispatch:
     inputs:
@@ -39,18 +38,3 @@ jobs:
         verbose: false # default
     - name: run-test
       run: pushd hack && ./test_module.sh ${{ github.event.inputs.kind-version }} ${{ github.event.inputs.fybrik-version }} ${{ github.event.inputs.module-version }} ${{ github.event.inputs.cert-manager-version }}
-
-=======
-
-on:
-  workflow_dispatch:
-
-jobs:
-  test:
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Show environment v1
-        run: env | grep ^GITHUB
-      - name: Show ref v1
-        run: echo "===============> Version from $GITHUB_REF"
->>>>>>> e925f14... Added dummy workflow for testing
