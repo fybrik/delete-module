@@ -12,7 +12,7 @@ export TOOLBIN=./tools/bin
 # Check if got args (like in github workflow test), else use default values
 if [ $# -eq 0 ]
 then 
-    kubernetesVersion=$(${TOOLBIN}/kubectl version -o=json | jq -r '.clientVersion.minor')
+    kubernetesVersion=$(${TOOLBIN}/kubectl version -o=yaml | ${TOOLBIN}/yq e '.clientVersion.minor' -)
     fybrikVersion=dev
     moduleVersion=0.6.0
     certManagerVersion=1.6.2
