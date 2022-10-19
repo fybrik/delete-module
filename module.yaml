@@ -8,7 +8,7 @@ metadata:
   namespace: fybrik-system
 spec:
   chart:
-    name: ghcr.io/fybrik/delete-module-chart:main
+    name: ghcr.io/fybrik/delete-module-chart:0.0.0-main
   type: service
   capabilities:
     - capability: delete
