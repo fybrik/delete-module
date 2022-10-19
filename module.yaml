@@ -1,14 +1,14 @@
 # Copyright 2020 IBM Corp.
 # SPDX-License-Identifier: Apache-2.0
 
-apiVersion: app.fybrik.io/v1alpha1
+apiVersion: app.fybrik.io/v1beta1
 kind: FybrikModule
 metadata:
   name: delete
   namespace: fybrik-system
 spec:
   chart:
-    name: ghcr.io/raviv-s/delete-module-chart:0.0.0
+    name: ghcr.io/fybrik/delete-module-chart:main
   type: service
   capabilities:
     - capability: delete
